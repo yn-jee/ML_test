@@ -33,7 +33,7 @@ import numpy as np
 class Conv3x3:
     def __init__(self, num_filters):
         self.num_filters = num_filters
-        self.filters = np.random.randn(num_filters, 3, 3) * np.sqrt(2. / num_filters) Z
+        self.filters = np.random.randn(num_filters, 3, 3) * np.sqrt(2. / num_filters)
 
     def iterate_regions(self, image):
         h, w, _ = image.shape

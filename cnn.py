@@ -5,43 +5,19 @@ from softmax import Softmax
 import numpy as np
 import os
 from PIL import Image
+import time
 
-"""def load_images_from_folder(folder, size=(128, 128)):
+def load_images_from_folder(folder, size=(128, 128)):
     images = []
     for filename in os.listdir(folder):
         with Image.open(os.path.join(folder, filename)) as img:
             img = img.resize(size).convert('RGB')  # Convert to RGB
             images.append(np.array(img))
-    images = np.array(images) / 255.0
-    return np.array(images)"""
 
-def load_images_from_folder(folder, size=(128, 128)):
-    images = []
-    labels = []
-    for filename in os.listdir(folder):
-        if filename.endswith(".jpg"):  # ensure to process only JPG files
-            label = filename.split('_')[0]  # Extracting label from filename, adjust as per your filename format
-            with Image.open(os.path.join(folder, filename)) as img:
-                img = img.resize(size).convert('RGB')  # Convert to RGB
-                images.append(np.array(img))
-                labels.append(label)
-    return np.array(images), np.array(labels)
-
-def load_data_and_labels():
-    folder_path = '../Dataset/'  # Adjust the path to your dataset
-    folder_types = ['Mild_Demented/', 'Moderate_Demented', 'Non_Demented', 'Very_Mild_Demented']
-    all_images = []
-    all_labels = []
-    for folder_type in folder_types:
-        path = os.path.join(folder_path, folder_type)
-        images, labels = load_images_from_folder(path)
-        all_images.extend(images)
-        all_labels.extend(labels)
-    return np.array(all_images), np.array(all_labels)
+    return np.array(images)
 
 
-
-folder_path = '../Dataset/'
+folder_path = './Dataset/'
 folder_types = ['Mild_Demented/', 'Moderate_Demented/', 'Non_Demented/', 'Very_Mild_Demented/']
 
 label_mapping = {
@@ -70,14 +46,24 @@ for folder_type in folder_types:
     train_img = all_images[:train_num]
     test_img = all_images[train_num:]
 
-    # 이미지 배열을 기존 배열에 추가
+    """"# 이미지 배열을 기존 배열에 추가
     train_images = np.concatenate((train_images, train_img), axis=0)
     test_images = np.concatenate((test_images, test_img), axis=0)
 
     # 레이블 배열 생성 및 추가
     label = folder_type[:-1]
     train_labels = np.concatenate((train_labels, np.full(train_num, label)))
-    test_labels = np.concatenate((test_labels, np.full(len(test_img), label)))
+    test_labels = np.concatenate((test_labels, np.full(len(test_img), label)))"""
+
+    # Normalize images
+    train_images = np.array([np.array(img) / 255.0 for img in train_images])
+    test_images = np.array([np.array(img) / 255.0 for img in test_images])
+
+    # Convert labels to numerical format
+    label_to_num = {label: idx for idx, label in enumerate(set(train_labels))}
+    train_labels = np.array([label_to_num[label] for label in train_labels])
+    test_labels = np.array([label_to_num[label] for label in test_labels])
+
 
 def calculate_flattened_output_size(input_shape, num_filters):
     # Unpack the input shape
@@ -120,12 +106,13 @@ def forward(image, label):
     return out, loss, acc
 
 print("Begin CNN")
+start = time.time()
 
 loss = 0
 num_correct = 0
 
 
-"""for i, (im, label) in enumerate(zip(test_images, test_labels)):
+for i, (im, label) in enumerate(zip(test_images, test_labels)):
     # Forward pass
     _, l, acc = forward(im, label)
     loss += l
@@ -138,7 +125,8 @@ num_correct = 0
             (i + 1, loss / 100, num_correct)
         )
         loss = 0
-        num_correct = 0"""
+        num_correct = 0
+
 
 
 def train(im, label, lr=.005):
@@ -170,3 +158,6 @@ for i, (im, label_index) in enumerate(zip(train_images, train_labels)):
     l, acc = train(im, label_index)
     loss += l
     num_correct += acc
+
+end = time.time()
+print(f"{end - start:.5f} sec")
