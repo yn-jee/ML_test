@@ -6,13 +6,39 @@ import numpy as np
 import os
 from PIL import Image
 
-def load_images_from_folder(folder, size=(128, 128)):
+"""def load_images_from_folder(folder, size=(128, 128)):
     images = []
     for filename in os.listdir(folder):
         with Image.open(os.path.join(folder, filename)) as img:
             img = img.resize(size).convert('RGB')  # Convert to RGB
             images.append(np.array(img))
-    return np.array(images)
+    images = np.array(images) / 255.0
+    return np.array(images)"""
+
+def load_images_from_folder(folder, size=(128, 128)):
+    images = []
+    labels = []
+    for filename in os.listdir(folder):
+        if filename.endswith(".jpg"):  # ensure to process only JPG files
+            label = filename.split('_')[0]  # Extracting label from filename, adjust as per your filename format
+            with Image.open(os.path.join(folder, filename)) as img:
+                img = img.resize(size).convert('RGB')  # Convert to RGB
+                images.append(np.array(img))
+                labels.append(label)
+    return np.array(images), np.array(labels)
+
+def load_data_and_labels():
+    folder_path = '../Dataset/'  # Adjust the path to your dataset
+    folder_types = ['Mild_Demented/', 'Moderate_Demented', 'Non_Demented', 'Very_Mild_Demented']
+    all_images = []
+    all_labels = []
+    for folder_type in folder_types:
+        path = os.path.join(folder_path, folder_type)
+        images, labels = load_images_from_folder(path)
+        all_images.extend(images)
+        all_labels.extend(labels)
+    return np.array(all_images), np.array(all_labels)
+
 
 
 folder_path = '../Dataset/'
@@ -99,7 +125,7 @@ loss = 0
 num_correct = 0
 
 
-for i, (im, label) in enumerate(zip(test_images, test_labels)):
+"""for i, (im, label) in enumerate(zip(test_images, test_labels)):
     # Forward pass
     _, l, acc = forward(im, label)
     loss += l
@@ -112,7 +138,7 @@ for i, (im, label) in enumerate(zip(test_images, test_labels)):
             (i + 1, loss / 100, num_correct)
         )
         loss = 0
-        num_correct = 0
+        num_correct = 0"""
 
 
 def train(im, label, lr=.005):
